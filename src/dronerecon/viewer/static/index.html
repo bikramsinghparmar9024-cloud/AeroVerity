@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reconstruction Viewer</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --text: #1d2330; --muted: #5b6475; --faint: #8a93a3;
+    --line: #e3e6eb; --accent: #2f6fdf; --accent-soft: #e8f0fd;
+    --ok: #1f8a5b; --ok-soft: #e4f4ec; --warn: #a86400; --warn-soft: #fdf2e0;
+    --canvas: #fbfcfd; --grid: #eceff3; --cam: #2f6fdf; --cam-off: #a3aab6;
+    --bad: #b42318; --bad-soft: #fdecea;
+    --shadow: 0 1px 2px rgba(20, 28, 45, .06), 0 2px 8px rgba(20, 28, 45, .04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #11141a; --panel: #181c24; --text: #e6e9ef; --muted: #a2aab8; --faint: #768093;
+      --line: #272c36; --accent: #6a9cf5; --accent-soft: #1d2a42;
+      --ok: #4cc38a; --ok-soft: #173024; --warn: #e3a44a; --warn-soft: #33260f;
+      --canvas: #0d1015; --grid: #1c212a; --cam: #6a9cf5; --cam-off: #5a6272;
+      --bad: #f07167; --bad-soft: #3a1a1a;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    display: flex; flex-direction: column;
+  }
+  header {
+    display: flex; align-items: center; gap: 12px; padding: 12px 20px;
+    border-bottom: 1px solid var(--line); background: var(--panel);
+  }
+  header h1 { font-size: 15px; font-weight: 600; margin: 0; }
+  header .sub { color: var(--muted); font-size: 13px; }
+  .pill {
+    margin-left: auto; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px;
+    background: var(--line); color: var(--muted); white-space: nowrap;
+  }
+  .pill.preview { background: var(--warn-soft); color: var(--warn); }
+  .pill.accepted { background: var(--ok-soft); color: var(--ok); }
+  main { flex: 1; display: grid; grid-template-columns: 1fr 340px; min-height: 0; }
+  .stage { position: relative; min-height: 360px; background: var(--canvas); }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+  canvas.dragging { cursor: grabbing; }
+  .toolbar {
+    position: absolute; left: 16px; bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 6px; box-shadow: var(--shadow);
+  }
+  .toolbar button, .toolbar select {
+    font: inherit; font-size: 13px; color: var(--text); background: transparent; border: 1px solid transparent;
+    border-radius: 7px; padding: 5px 10px; cursor: pointer;
+  }
+  .toolbar button:hover, .toolbar select:hover { background: var(--bg); }
+  .toolbar button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+  .toolbar .sep { width: 1px; align-self: stretch; background: var(--line); }
+  .toolbar .group { display: contents; }
+  .hint { position: absolute; right: 16px; bottom: 16px; color: var(--faint); font-size: 12px; }
+  .legend {
+    position: absolute; right: 16px; top: 16px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px; padding: 8px 10px; font-size: 12px; color: var(--muted); box-shadow: var(--shadow);
+  }
+  .legend .bar { width: 160px; height: 8px; border-radius: 4px; margin: 6px 0 2px; }
+  .legend .ends { display: flex; justify-content: space-between; }
+  .empty {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: var(--muted); text-align: center; padding: 24px; gap: 6px;
+  }
+  .empty strong { color: var(--text); font-weight: 600; }
+  aside { border-left: 1px solid var(--line); background: var(--panel); overflow-y: auto; padding: 4px 20px 24px; }
+  section { padding: 16px 0; border-bottom: 1px solid var(--line); }
+  section:last-child { border-bottom: 0; }
+  h2 { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--faint); margin: 0 0 10px; }
+  p { margin: 0 0 8px; }
+  .notice {
+    border-radius: 8px; padding: 10px 12px; font-size: 13px; background: var(--warn-soft); color: var(--warn);
+  }
+  dl { display: grid; grid-template-columns: auto auto 1fr; gap: 6px 12px; margin: 0; font-size: 13px; }
+  dl .h { color: var(--faint); font-size: 12px; }
+  dt { color: var(--muted); }
+  dd { margin: 0; font-variant-numeric: tabular-nums; }
+  dd.chosen { font-weight: 600; }
+  ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+  li + li { margin-top: 4px; }
+  .kv { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding: 2px 0; }
+  .kv span:first-child { color: var(--muted); }
+  .kv span:last-child { font-variant-numeric: tabular-nums; text-align: right; }
+  .muted { color: var(--muted); }
+  .head-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .head-actions .pill { margin-left: 0; }
+  select.runs {
+    font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--panel); color: var(--text); max-width: 280px;
+  }
+  .btn {
+    font: inherit; font-size: 13px; font-weight: 600; border-radius: 8px; padding: 7px 14px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel); color: var(--text); white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn:disabled { opacity: .55; cursor: default; filter: none; }
+  .bar-track { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin: 8px 0 10px; }
+  .bar-fill { height: 100%; width: 0; background: var(--accent); transition: width .3s ease; }
+  .steps { list-style: none; padding: 0; margin: 0; }
+  .steps li { display: flex; gap: 10px; align-items: center; font-size: 13px; color: var(--faint); padding: 2px 0; margin: 0; }
+  .steps li::before {
+    content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--line);
+  }
+  .steps li.done { color: var(--muted); }
+  .steps li.done::before { background: var(--ok); border-color: var(--ok); }
+  .steps li.now { color: var(--text); font-weight: 600; }
+  .steps li.now::before { border-color: var(--accent); background: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .25; } }
+  .notice.error { background: var(--bad-soft); color: var(--bad); margin-top: 10px; }
+  .downloads a {
+    display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 13px;
+    color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--line);
+  }
+  .downloads a:last-child { border-bottom: 0; }
+  .downloads a span:last-child { color: var(--faint); }
+  .downloads a:hover span:first-child { text-decoration: underline; }
+  dialog {
+    border: 1px solid var(--line); border-radius: 14px; padding: 0; width: min(540px, calc(100vw - 32px));
+    background: var(--panel); color: var(--text); box-shadow: 0 16px 48px rgba(0, 0, 0, .28);
+  }
+  dialog::backdrop { background: rgba(10, 14, 22, .5); }
+  .dlg-head { padding: 20px 22px 6px; }
+  .dlg-title { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+  .dlg-body { padding: 10px 22px 4px; display: grid; gap: 16px; }
+  .field > label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+  .field .help { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  .field input[type=text] {
+    width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--bg); color: var(--text);
+  }
+  .field input[type=text]:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  .file { border: 1px dashed var(--line); border-radius: 10px; padding: 10px 12px; background: var(--bg); }
+  .file input { font: inherit; font-size: 13px; color: var(--muted); width: 100%; }
+  .dlg-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 22px 18px; border-top: 1px solid var(--line); margin-top: 14px; }
+  @media (max-width: 820px) {
+    header { flex-wrap: wrap; }
+    .head-actions { margin-left: 0; width: 100%; }
+    select.runs { flex: 1; min-width: 0; max-width: none; }
+    main { grid-template-columns: 1fr; grid-template-rows: 60vh auto; }
+    aside { border-left: 0; border-top: 1px solid var(--line); }
+    .hint { display: none; }
+    .toolbar { left: 8px; right: 8px; bottom: 8px; gap: 2px; padding: 4px; flex-wrap: nowrap; overflow-x: auto; }
+    .toolbar button, .toolbar select { font-size: 12px; padding: 5px 7px; white-space: nowrap; }
+    .legend { right: 8px; top: 8px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1 id="title">Reconstruction</h1>
+    <div class="sub" id="subtitle">Connecting…</div>
+  </div>
+  <div class="head-actions">
+    <select class="runs" id="runPicker" aria-label="Choose a reconstruction" hidden></select>
+    <button class="btn primary" id="newRun" hidden>New reconstruction</button>
+    <span class="pill" id="pill">Waiting</span>
+  </div>
+</header>
+<main>
+  <div class="stage">
+    <canvas id="view" aria-label="3D view of cameras and points"></canvas>
+    <div class="empty" id="empty">
+      <strong>Waiting for the first preview</strong>
+      <span>This page updates by itself as soon as the pipeline has camera positions to show.</span>
+    </div>
+    <div class="legend" id="legend" hidden>
+      <div id="legendTitle">Height</div>
+      <div class="bar" id="legendBar"></div>
+      <div class="ends"><span id="legendMin"></span><span id="legendMax"></span></div>
+    </div>
+    <div class="toolbar" id="toolbar" hidden>
+      <span class="group" id="pointControls">
+        <button id="tPoints" aria-pressed="true">Points</button>
+        <select id="colorBy" aria-label="Colour points by">
+          <option value="height">Colour: height</option>
+          <option value="error">Colour: fit error</option>
+        </select>
+        <span class="sep"></span>
+      </span>
+      <button id="tCams" aria-pressed="true">Cameras</button>
+      <span class="sep"></span>
+      <button id="reset">Reset view</button>
+    </div>
+    <div class="hint">Drag to orbit · Shift-drag to pan · Scroll to zoom</div>
+  </div>
+  <aside>
+    <section id="secStatus">
+      <h2>Status</h2>
+      <p id="statusText">Nothing to show yet.</p>
+      <div class="notice" id="mockNotice" hidden></div>
+    </section>
+    <section id="secProgress" hidden>
+      <h2>Progress</h2>
+      <p id="progressText"></p>
+      <div class="bar-track"><div class="bar-fill" id="progressBar"></div></div>
+      <ol class="steps" id="steps"></ol>
+      <div class="notice error" id="jobError" hidden></div>
+    </section>
+    <section id="secDownloads" hidden>
+      <h2>Results</h2>
+      <div class="downloads" id="downloads"></div>
+    </section>
+    <section id="secDecision" hidden>
+      <h2>Why this trajectory</h2>
+      <div id="reasons"></div>
+    </section>
+    <section id="secMetrics" hidden>
+      <h2>Fit quality</h2>
+      <dl id="metrics"></dl>
+    </section>
+    <section id="secScene" hidden>
+      <h2>Scene</h2>
+      <div id="scene"></div>
+    </section>
+    <section id="secNotes" hidden>
+      <h2>Notes</h2>
+      <ul id="notes"></ul>
+    </section>
+  </aside>
+</main>
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <form id="uploadForm" novalidate>
+    <div class="dlg-head">
+      <div class="dlg-title" id="dlgTitle">New reconstruction</div>
+      <p class="muted">Upload a drone video and its telemetry. Everything is processed on this computer; nothing is sent anywhere else.</p>
+    </div>
+    <div class="dlg-body">
+      <div class="field">
+        <label for="fTitle">Name</label>
+        <input type="text" id="fTitle" maxlength="120" placeholder="e.g. Bridge inspection, north span">
+      </div>
+      <div class="field">
+        <label for="fVideo">Video</label>
+        <div class="file"><input type="file" id="fVideo" accept=".mp4,.mov,.avi,.mkv,.m4v"></div>
+        <div class="help">MP4, MOV, AVI or MKV, straight from the drone.</div>
+      </div>
+      <div class="field">
+        <label for="fTele">Telemetry</label>
+        <div class="file"><input type="file" id="fTele" accept=".srt,.csv"></div>
+        <div class="help">The .SRT file with the same name as the video (turn on Video Captions in DJI Fly before flying), or a flight-log .CSV.</div>
+      </div>
+      <div class="field">
+        <label for="fCam">Camera calibration <span class="muted">(optional)</span></label>
+        <div class="file"><input type="file" id="fCam" accept=".json"></div>
+      </div>
+      <div id="upBox" hidden>
+        <div id="upText" class="muted"></div>
+        <div class="bar-track"><div class="bar-fill" id="upBar"></div></div>
+      </div>
+      <div class="notice error" id="upError" hidden></div>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn" id="cancelUp">Cancel</button>
+      <button type="submit" class="btn primary" id="startUp">Upload and start</button>
+    </div>
+  </form>
+</dialog>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const canvas = $("view"), ctx = canvas.getContext("2d");
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const RAMP = [[68, 1, 84], [59, 82, 139], [33, 145, 140], [94, 201, 98], [253, 231, 37]];
+
+  let data = null, signature = "";
+  let show = { points: true, cams: true, colorBy: "height" };
+  const view = { yaw: -2.3, pitch: 0.75, dist: 100, target: [0, 0, 0], fov: 50 * Math.PI / 180 };
+  let colors = null, range = [0, 1];
+
+  // ---------------------------------------------------------------- vector helpers
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+  const mul = (a, s) => [a[0] * s, a[1] * s, a[2] * s];
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const norm = (a) => mul(a, 1 / (Math.hypot(a[0], a[1], a[2]) || 1));
+
+  function basis() {
+    const cp = Math.cos(view.pitch);
+    const eye = add(view.target, mul([cp * Math.cos(view.yaw), cp * Math.sin(view.yaw), Math.sin(view.pitch)], view.dist));
+    const fwd = norm(sub(view.target, eye));
+    const right = norm(cross(fwd, [0, 0, 1]));
+    return { eye, fwd, right, up: cross(right, fwd) };
+  }
+
+  function projector() {
+    const b = basis(), w = canvas.clientWidth, h = canvas.clientHeight;
+    const f = 0.5 * h / Math.tan(view.fov / 2), near = view.dist * 0.01;
+    return (p) => {
+      const d = sub(p, b.eye), z = dot(d, b.fwd);
+      if (z < near) return null;
+      return [w / 2 + f * dot(d, b.right) / z, h / 2 - f * dot(d, b.up) / z, z];
+    };
+  }
+
+  // ---------------------------------------------------------------- colour
+  function ramp(t) {
+    t = Math.min(1, Math.max(0, t)) * (RAMP.length - 1);
+    const i = Math.min(RAMP.length - 2, Math.floor(t)), u = t - i;
+    const c = RAMP[i].map((v, k) => Math.round(v + (RAMP[i + 1][k] - v) * u));
+    return `rgb(${c[0]},${c[1]},${c[2]})`;
+  }
+  function percentile(arr, q) {
+    const s = Float64Array.from(arr).sort();
+    return s.length ? s[Math.min(s.length - 1, Math.floor(q * (s.length - 1)))] : 0;
+  }
+  function computeColors() {
+    const pts = data && data.points;
+    if (!pts || !pts.length) { colors = null; return; }
+    const vals = show.colorBy === "error" && data.point_error_px ? data.point_error_px : pts.map((p) => p[2]);
+    range = [percentile(vals, 0.02), percentile(vals, 0.98)];
+    if (range[1] - range[0] < 1e-9) range[1] = range[0] + 1;
+    colors = vals.map((v) => ramp((v - range[0]) / (range[1] - range[0])));
+    const unit = show.colorBy === "error" ? " px" : " m";
+    $("legendTitle").textContent = show.colorBy === "error" ? "Fit error" : "Height";
+    $("legendBar").style.background = `linear-gradient(90deg, ${RAMP.map((c) => `rgb(${c})`).join(",")})`;
+    $("legendMin").textContent = range[0].toFixed(1) + unit;
+    $("legendMax").textContent = range[1].toFixed(1) + unit;
+  }
+
+  // ---------------------------------------------------------------- scene fit
+  function fitView() {
+    const cams = data.cameras.map((c) => c.center);
+    const all = cams.concat(data.points || []);
+    const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+    for (const p of all) for (let k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], p[k]); hi[k] = Math.max(hi[k], p[k]); }
+    view.target = mul(add(lo, hi), 0.5);
+    const radius = Math.max(1, 0.5 * Math.hypot(hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]));
+    view.dist = 1.25 * radius / Math.tan(view.fov / 2);
+    view.yaw = -2.3; view.pitch = 0.75;
+  }
+  function sceneScale() {
+    const c = data.cameras;
+    if (c.length < 2) return 5;
+    let s = 0;
+    for (let i = 1; i < c.length; i++) s += Math.hypot(...sub(c[i].center, c[i - 1].center));
+    return Math.max(0.5, 0.6 * s / (c.length - 1));
+  }
+
+  // ---------------------------------------------------------------- drawing
+  function draw() {
+    const dpr = window.devicePixelRatio || 1, w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+      canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = css("--canvas"); ctx.fillRect(0, 0, w, h);
+    if (!data) return;
+    const P = projector();
+    drawGrid(P);
+    if (show.points && data.points && colors) drawPoints(P);
+    if (show.cams) drawCameras(P);
+  }
+
+  function drawGrid(P) {
+    const c = data.cameras.map((x) => x.center), zs = (data.points || []).map((p) => p[2]);
+    const z0 = zs.length ? percentile(zs, 0.02) : Math.min(...c.map((p) => p[2])) - 50;
+    const span = Math.max(20, view.dist * 0.8), step = Math.pow(10, Math.floor(Math.log10(span / 4)));
+    const cx = Math.round(view.target[0] / step) * step, cy = Math.round(view.target[1] / step) * step;
+    ctx.strokeStyle = css("--grid"); ctx.lineWidth = 1; ctx.beginPath();
+    for (let i = -8; i <= 8; i++) {
+      for (const [a, b] of [[[cx + i * step, cy - 8 * step, z0], [cx + i * step, cy + 8 * step, z0]],
+                            [[cx - 8 * step, cy + i * step, z0], [cx + 8 * step, cy + i * step, z0]]]) {
+        const pa = P(a), pb = P(b);
+        if (pa && pb) { ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); }
+      }
+    }
+    ctx.stroke();
+  }
+
+  function drawPoints(P) {
+    const proj = [];
+    data.points.forEach((p, i) => { const q = P(p); if (q) proj.push([q[0], q[1], q[2], i]); });
+    proj.sort((a, b) => b[2] - a[2]);
+    const size = Math.max(1.5, Math.min(3, 2.2 * 120 / view.dist));
+    for (const [x, y, , i] of proj) { ctx.fillStyle = colors[i]; ctx.fillRect(x - size / 2, y - size / 2, size, size); }
+  }
+
+  function drawCameras(P) {
+    const cams = data.cameras, s = sceneScale(), K = data.intrinsics;
+    const hw = 0.5 * K.width / K.fx, hh = 0.5 * K.height / K.fy;
+    ctx.lineWidth = 2; ctx.strokeStyle = css("--cam"); ctx.setLineDash([]);
+    ctx.beginPath();
+    let started = false;
+    for (const c of cams) {
+      const q = P(c.center); if (!q) { started = false; continue; }
+      if (!started) { ctx.moveTo(q[0], q[1]); started = true; } else ctx.lineTo(q[0], q[1]);
+    }
+    ctx.globalAlpha = 0.5; ctx.stroke(); ctx.globalAlpha = 1;
+
+    ctx.lineWidth = 1.2;
+    for (const c of cams) {
+      const R = c.R_cw, x = R[0], y = R[1], z = R[2];
+      const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([u, v]) =>
+        add(c.center, mul(add(z, add(mul(x, u * hw), mul(y, v * hh))), s)));
+      const o = P(c.center), q = corners.map(P);
+      if (!o || q.some((v) => !v)) continue;
+      ctx.strokeStyle = c.valid ? css("--cam") : css("--cam-off");
+      ctx.setLineDash(c.valid ? [] : [3, 3]);
+      ctx.beginPath();
+      for (const v of q) { ctx.moveTo(o[0], o[1]); ctx.lineTo(v[0], v[1]); }
+      ctx.moveTo(q[0][0], q[0][1]);
+      for (const v of q.slice(1).concat([q[0]])) ctx.lineTo(v[0], v[1]);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+  }
+
+  // ---------------------------------------------------------------- side panel
+  const fmt = (v, d = 1) => (v === null || v === undefined || !isFinite(v)) ? "—" : Number(v).toFixed(d);
+  function el(tag, text, cls) { const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (cls) e.className = cls; return e; }
+  function kv(label, value) { const d = el("div", undefined, "kv"); d.append(el("span", label), el("span", value)); return d; }
+
+  function renderPanel(state) {
+    const d = data, accepted = state.stage === "accepted";
+    $("title").textContent = d.title || "Reconstruction";
+    $("subtitle").textContent = accepted
+      ? `Verified trajectory · ${d.cameras.length} keyframes`
+      : `Quick preview · ${d.cameras.length} keyframes`;
+    const pill = $("pill");
+    pill.className = "pill " + (accepted ? "accepted" : "preview");
+    pill.textContent = accepted ? "Verified" : "Preview";
+
+    $("statusText").textContent = accepted
+      ? (d.accepted === "ai" ? "The fast trajectory passed verification and is being used."
+                             : "The fast trajectory did not pass verification, so the carefully adjusted one is being used.")
+      : "Showing the quick preview. It will be replaced automatically once the positions have been checked.";
+    const mock = $("mockNotice");
+    const mockUsed = d.is_mock;
+    mock.hidden = !mockUsed;
+    if (mockUsed) mock.textContent = "These camera positions come from a stand-in for the AI pose model. " +
+      "They are approximate and are not used for measurement.";
+
+    $("secDecision").hidden = !accepted;
+    const reasons = $("reasons"); reasons.replaceChildren();
+    for (const r of d.reasons || []) reasons.append(el("p", r));
+
+    $("secMetrics").hidden = !accepted;
+    const m = $("metrics"); m.replaceChildren();
+    if (accepted && d.metrics) {
+      m.append(el("dt", ""), el("dd", "Fast", "h"), el("dd", "Adjusted", "h"));
+      const rows = [
+        ["Fit error (90%)", "reproj_p90_px", " px", 1],
+        ["Distance from GPS", "gps_rms_m", " m", 1],
+        ["Agreement with GPS", "gps_nrms", "σ", 1],
+        ["Real poses", "valid_fraction", "", 0],
+      ];
+      for (const [label, key, unit, dec] of rows) {
+        const a = d.metrics.ai[key], c = d.metrics.classical[key];
+        const show = (v) => key === "valid_fraction" ? fmt(v * 100, 0) + "%" : fmt(v, dec) + unit;
+        m.append(el("dt", label), el("dd", show(a), d.accepted === "ai" ? "chosen" : ""),
+                 el("dd", show(c), d.accepted === "classical" ? "chosen" : ""));
+      }
+    }
+
+    const sc = $("scene"); sc.replaceChildren();
+    $("secScene").hidden = false;
+    sc.append(kv("Keyframes", String(d.cameras.length)));
+    const bad = d.cameras.filter((c) => !c.valid).length;
+    if (bad) sc.append(kv("Uncertain poses", String(bad)));
+    if (d.points_total) sc.append(kv("3D points", d.points_total.toLocaleString() +
+      (d.points && d.points.length < d.points_total ? ` (showing ${d.points.length.toLocaleString()})` : "")));
+    sc.append(kv("Coordinates", d.world === "enu" ? "Metres, east/north/up" : "Relative (not yet placed)"));
+    sc.append(kv("Pose source", d.source));
+
+    const notes = $("notes"); notes.replaceChildren();
+    for (const n of d.notes || []) notes.append(el("li", n.charAt(0).toUpperCase() + n.slice(1) + (/[.!?]$/.test(n) ? "" : ".")));
+    $("secNotes").hidden = !(d.notes && d.notes.length);
+  }
+
+  // ---------------------------------------------------------------- runs, progress, downloads (app mode)
+  const STAGES = ["Ingestion", "Synchronisation", "Pre-flight check", "Keyframes", "Matching", "Calibration",
+    "Camera poses", "Coverage", "Georeferencing", "Depth", "Surface", "Uncertainty", "Trust", "Re-fly advice", "Outputs"];
+  const STATE_LABEL = { waiting_for_files: "Waiting for files", queued: "Queued", running: "Running",
+    done: "Finished", failed: "Failed", stopped: "Stopped", unknown: "Unknown" };
+  const DOWNLOADS = [["model.glb", "3D model (GLB)"], ["points.las", "Point cloud (LAS)"], ["model.ply", "Mesh (PLY)"],
+    ["dsm.tif", "Surface model (GeoTIFF)"], ["ortho.tif", "Orthophoto (GeoTIFF)"], ["trust.tif", "Trust map (GeoTIFF)"],
+    ["classes.geojson", "Class areas (GeoJSON)"], ["refly_advice.json", "Re-fly advice (JSON)"],
+    ["splat_seed.ply", "Splat seed, untrained (PLY)"]];
+  let uploads = false, currentRun = null, runs = [];
+
+  function selectRun(id) {
+    if (id === currentRun) return;
+    currentRun = id;
+    try { history.replaceState(null, "", id ? "#run=" + encodeURIComponent(id) : "#"); } catch (e) { /* ignore */ }
+    data = null; signature = ""; colors = null;
+    $("empty").hidden = false; $("toolbar").hidden = true; $("legend").hidden = true;
+    for (const s of ["secDecision", "secMetrics", "secScene", "secNotes", "secProgress", "secDownloads"]) $(s).hidden = true;
+    $("mockNotice").hidden = true;
+    $("statusText").textContent = "Loading…";
+    $("title").textContent = "Reconstruction"; $("subtitle").textContent = "";
+    $("pill").className = "pill"; $("pill").textContent = "Waiting";
+    $("runPicker").value = id || "";
+    draw();
+    poll();
+  }
+
+  async function refreshRuns() {
+    try {
+      runs = await (await fetch("api/runs", { cache: "no-store" })).json();
+    } catch (e) { return; }
+    const picker = $("runPicker");
+    picker.replaceChildren();
+    for (const r of runs) {
+      const o = document.createElement("option");
+      o.value = r.id;
+      o.textContent = `${r.title || r.id} · ${STATE_LABEL[r.state] || r.state}`;
+      picker.append(o);
+    }
+    picker.hidden = runs.length === 0;
+    if (currentRun) picker.value = currentRun;
+    if (!currentRun && runs.length) selectRun(runs[0].id);
+    if (!runs.length) {
+      $("empty").querySelector("strong").textContent = "No reconstructions yet";
+      $("empty").querySelector("span").textContent = "Press New reconstruction to upload a drone video and its telemetry.";
+      $("subtitle").textContent = "Ready";
+    }
+  }
+
+  function renderJob(job) {
+    $("secProgress").hidden = !job;
+    $("secDownloads").hidden = !(job && job.state === "done");
+    if (!job) return;
+    const done = new Set(job.stages_done || []);
+    const running = job.state === "running" || job.state === "queued";
+    const steps = $("steps");
+    steps.replaceChildren();
+    for (const s of STAGES) {
+      const li = el("li", s);
+      if (done.has(s)) li.className = "done";
+      else if (running && s === job.stage) li.className = "now";
+      steps.append(li);
+    }
+    const frac = job.state === "done" ? 1 : done.size / STAGES.length;
+    $("progressBar").style.width = `${Math.round(frac * 100)}%`;
+    const label = STATE_LABEL[job.state] || job.state;
+    $("progressText").textContent = job.state === "running"
+      ? `${label}: ${job.stage || "starting"} (${done.size} of ${STAGES.length} steps done)`
+      : job.state === "done" ? `Finished. ${job.message || ""}` : `${label}. ${job.message || ""}`;
+    const err = $("jobError");
+    err.hidden = !(job.state === "failed" || job.state === "stopped");
+    if (!err.hidden) err.textContent = job.message || "The run did not complete.";
+    if (job.state === "done") {
+      const box = $("downloads");
+      box.replaceChildren();
+      const report = el("a");
+      report.href = `runs/${encodeURIComponent(job.id)}/report`;
+      report.target = "_blank"; report.rel = "noopener";
+      report.append(el("span", "Quality report"), el("span", "opens in a new tab"));
+      box.append(report);
+      for (const [name, label] of DOWNLOADS) {
+        const a = el("a");
+        a.href = `runs/${encodeURIComponent(job.id)}/download/${name}`;
+        a.setAttribute("download", name);
+        a.append(el("span", label), el("span", "download"));
+        box.append(a);
+      }
+    }
+    if (!data) {
+      $("title").textContent = job.title || "Reconstruction";
+      $("subtitle").textContent = label;
+      $("statusText").textContent = job.state === "running" || job.state === "queued"
+        ? "Reconstruction in progress. The 3D view fills in once camera positions are ready."
+        : job.message || label;
+      const empty = $("empty");
+      empty.querySelector("strong").textContent =
+        job.state === "failed" || job.state === "stopped" ? "This reconstruction did not complete"
+          : job.state === "done" ? "Finished" : "Working on it";
+      empty.querySelector("span").textContent =
+        job.state === "failed" || job.state === "stopped" ? "See Progress for what went wrong."
+          : "Camera positions appear here as soon as they are ready. This page updates by itself.";
+    }
+  }
+
+  // ---------------------------------------------------------------- upload
+  let xhr = null, cancelled = false;
+  function put(url, file, onProgress) {
+    return new Promise((resolve, reject) => {
+      xhr = new XMLHttpRequest();
+      xhr.open("PUT", url);
+      xhr.upload.onprogress = (e) => { if (e.lengthComputable) onProgress(e.loaded); };
+      xhr.onload = () => {
+        let body = {};
+        try { body = JSON.parse(xhr.responseText); } catch (e) { /* ignore */ }
+        xhr.status < 300 ? resolve(body) : reject(new Error(body.error || `Upload failed (${xhr.status}).`));
+      };
+      xhr.onerror = () => reject(new Error("Upload failed: the connection to this computer's app was lost."));
+      xhr.onabort = () => reject(new Error("Upload cancelled."));
+      xhr.send(file);
+    });
+  }
+  const mb = (n) => (n / 1048576).toFixed(n > 1048576 * 100 ? 0 : 1) + " MB";
+
+  function resetDialog() {
+    $("uploadForm").reset();
+    $("upBox").hidden = true; $("upError").hidden = true;
+    $("upBar").style.width = "0";
+    $("startUp").disabled = false; $("startUp").textContent = "Upload and start";
+    for (const id of ["fTitle", "fVideo", "fTele", "fCam"]) $(id).disabled = false;
+  }
+
+  $("newRun").addEventListener("click", () => { resetDialog(); $("dlg").showModal(); $("fTitle").focus(); });
+  $("cancelUp").addEventListener("click", () => { cancelled = true; if (xhr) xhr.abort(); $("dlg").close(); });
+  $("runPicker").addEventListener("change", (e) => selectRun(e.target.value));
+  window.addEventListener("hashchange", () => {  // links and the back button change only the #run= part
+    const m = /run=([^&]+)/.exec(location.hash);
+    if (uploads && m) selectRun(decodeURIComponent(m[1]));
+  });
+
+  $("uploadForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const video = $("fVideo").files[0], tele = $("fTele").files[0], cam = $("fCam").files[0];
+    const errBox = $("upError");
+    errBox.hidden = true;
+    if (!video || !tele) {
+      errBox.textContent = !video ? "Choose the drone video." : "Choose the telemetry file (.SRT or .CSV).";
+      errBox.hidden = false;
+      return;
+    }
+    cancelled = false;
+    $("startUp").disabled = true; $("startUp").textContent = "Uploading…";
+    for (const id of ["fTitle", "fVideo", "fTele", "fCam"]) $(id).disabled = true;
+    $("upBox").hidden = false;
+    const files = [["video", video], ["telemetry", tele]].concat(cam ? [["intrinsics", cam]] : []);
+    const total = files.reduce((s, [, f]) => s + f.size, 0);
+    let sent = 0;
+    try {
+      const title = $("fTitle").value.trim() || video.name.replace(/\.[^.]+$/, "");
+      const res = await fetch("api/runs", { method: "POST", headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({ title }) });
+      if (!res.ok) throw new Error("Could not create the run.");
+      const run = await res.json();
+      for (const [kind, f] of files) {
+        await put(`api/runs/${encodeURIComponent(run.id)}/files/${kind}?name=${encodeURIComponent(f.name)}`, f, (loaded) => {
+          const now = sent + loaded;
+          $("upBar").style.width = `${Math.round(now / total * 100)}%`;
+          $("upText").textContent = `Uploading ${f.name}: ${mb(now)} of ${mb(total)}`;
+        });
+        sent += f.size;
+      }
+      $("upText").textContent = "Starting the reconstruction…";
+      const start = await fetch(`api/runs/${encodeURIComponent(run.id)}/start`, { method: "POST",
+        headers: { "Content-Type": "application/json" }, body: "{}" });
+      if (!start.ok) throw new Error((await start.json()).error || "Could not start the run.");
+      $("dlg").close();
+      await refreshRuns();
+      selectRun(run.id);
+    } catch (err) {
+      if (cancelled) return;
+      errBox.textContent = err.message; errBox.hidden = false;
+      $("startUp").disabled = false; $("startUp").textContent = "Try again";
+      for (const id of ["fTitle", "fVideo", "fTele", "fCam"]) $(id).disabled = false;
+    }
+  });
+
+  // ---------------------------------------------------------------- polling
+  async function poll() {
+    try {
+      const url = currentRun ? "api/state?run=" + encodeURIComponent(currentRun) : "api/state";
+      const asked = currentRun;
+      const res = await fetch(url, { cache: "no-store" });
+      const state = await res.json();
+      if (asked !== currentRun) return;  // the user switched runs while this request was in flight
+      if (uploads) renderJob(state.job);
+      const payload = state.accepted || state.preview;
+      if (!payload) { if (!uploads) $("subtitle").textContent = "Waiting for the pipeline…"; return; }
+      const sig = state.stage + ":" + payload.cameras.length + ":" + (payload.points_total || 0) + ":" +
+        JSON.stringify(payload.reasons || []) + ":" + JSON.stringify(payload.cameras[0].center);
+      if (sig === signature) return;
+      const first = !data;
+      signature = sig; data = payload;
+      $("empty").hidden = true; $("toolbar").hidden = false;
+      const hasPoints = !!(data.points && data.points.length);
+      $("legend").hidden = !hasPoints;
+      $("pointControls").hidden = !hasPoints;
+      $("colorBy").disabled = !data.point_error_px;
+      computeColors();
+      if (first || state.stage === "accepted") fitView();
+      renderPanel(state);
+      draw();
+    } catch (e) {
+      $("subtitle").textContent = "Lost connection to the pipeline. Retrying…";
+    }
+  }
+
+  // ---------------------------------------------------------------- interaction
+  let drag = null;
+  canvas.addEventListener("pointerdown", (e) => {
+    drag = { x: e.clientX, y: e.clientY, pan: e.shiftKey || e.button === 2 };
+    canvas.setPointerCapture(e.pointerId); canvas.classList.add("dragging");
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    if (!drag || !data) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    drag.x = e.clientX; drag.y = e.clientY;
+    if (drag.pan) {
+      const b = basis(), k = view.dist / canvas.clientHeight * 2 * Math.tan(view.fov / 2);
+      view.target = add(view.target, add(mul(b.right, -dx * k), mul(b.up, dy * k)));
+    } else {
+      view.yaw -= dx * 0.006;
+      view.pitch = Math.min(1.55, Math.max(0.05, view.pitch + dy * 0.006));
+    }
+    draw();
+  });
+  const endDrag = () => { drag = null; canvas.classList.remove("dragging"); };
+  canvas.addEventListener("pointerup", endDrag);
+  canvas.addEventListener("pointercancel", endDrag);
+  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+  canvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    view.dist *= Math.exp(e.deltaY * 0.0012);
+    draw();
+  }, { passive: false });
+
+  function toggle(btn, key) {
+    btn.addEventListener("click", () => {
+      show[key] = !show[key]; btn.setAttribute("aria-pressed", String(show[key])); draw();
+    });
+  }
+  toggle($("tPoints"), "points");
+  toggle($("tCams"), "cams");
+  $("colorBy").addEventListener("change", (e) => { show.colorBy = e.target.value; computeColors(); draw(); });
+  $("reset").addEventListener("click", () => { if (data) { fitView(); draw(); } });
+  window.addEventListener("resize", draw);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+
+  draw();
+  (async () => {
+    try { uploads = !!(await (await fetch("api/config", { cache: "no-store" })).json()).uploads; } catch (e) { /* single-run */ }
+    if (uploads) {
+      $("newRun").hidden = false;
+      const m = /run=([^&]+)/.exec(location.hash);
+      if (m) currentRun = decodeURIComponent(m[1]);
+      await refreshRuns();
+      setInterval(refreshRuns, 5000);
+    }
+    poll();
+    setInterval(poll, 2000);
+  })();
+})();
+</script>
+</body>
+</html>

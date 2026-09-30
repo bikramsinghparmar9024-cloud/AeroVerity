@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dronerecon"
+version = "0.1.0"
+description = "Single-pass drone video to georeferenced 3D model (SIH26158)"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.23", "scipy>=1.10", "opencv-python>=4.8", "scikit-image>=0.21",
+                "tifffile>=2023.1", "cryptography>=41"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "trimesh>=4"]
+matching = ["lightglue @ git+https://github.com/cvg/LightGlue.git"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+dronerecon = ["viewer/static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
