@@ -1,4 +1,4 @@
-# dronerecon
+# AeroMetric
 
 Single-pass drone video → georeferenced, metric 3D model that says how much of itself it can vouch for.
 Built for Smart India Hackathon 2026, problem statement **SIH26158** (NTRO).
@@ -29,7 +29,7 @@ about 50 MB) into the torch cache. On an air-gapped machine, copy those two file
 ## Easiest: the local web app
 
 ```bash
-python -m dronerecon app --runs runs
+python -m aerometric app --runs runs
 ```
 
 Open **http://localhost:8765**, press **New reconstruction**, choose the video and its `.SRT` (or flight-log
@@ -40,7 +40,7 @@ Earlier runs stay in the run picker. Runs are processed one at a time; everythin
 ## Reconstruct a flight from the command line
 
 ```bash
-python -m dronerecon run --video DJI_0001.MP4 --telemetry DJI_0001.SRT --out runs/flight1 --viewer
+python -m aerometric run --video DJI_0001.MP4 --telemetry DJI_0001.SRT --out runs/flight1 --viewer
 ```
 
 `--viewer` opens a live page on `http://127.0.0.1:8765`: a quick preview first, then the verified result.
@@ -78,7 +78,7 @@ The run stops early if the pre-flight check expects an unusable model (heavy blu
 ## Compare two flights
 
 ```bash
-python -m dronerecon compare runs/flight1 runs/flight2 --out runs/change
+python -m aerometric compare runs/flight1 runs/flight2 --out runs/change
 ```
 
 Aligns flight 2 onto flight 1, then reports only height changes larger than both flights' uncertainty:
@@ -87,7 +87,7 @@ Aligns flight 2 onto flight 1, then reports only height changes larger than both
 ## Check a report has not been altered
 
 ```bash
-python -m dronerecon verify runs/flight1/report/quality_report.json --files runs/flight1
+python -m aerometric verify runs/flight1/report/quality_report.json --files runs/flight1
 ```
 
 ## Current limitations

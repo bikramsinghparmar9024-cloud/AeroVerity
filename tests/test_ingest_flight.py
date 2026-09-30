@@ -4,11 +4,11 @@ import cv2
 import numpy as np
 import pytest
 
-from dronerecon.config import PathsConfig, PipelineConfig
-from dronerecon.ingest.flight import FlightInputs, ingest_flight
-from dronerecon.ingest.intrinsics import load_intrinsics
-from dronerecon.ingest.rtk import parse_rtklib_pos
-from dronerecon.types import DataError
+from aerometric.config import PathsConfig, PipelineConfig
+from aerometric.ingest.flight import FlightInputs, ingest_flight
+from aerometric.ingest.intrinsics import load_intrinsics
+from aerometric.ingest.rtk import parse_rtklib_pos
+from aerometric.types import DataError
 
 POS = """% program   : RTKPOST ver.2.4.3
 %  GPST                  latitude(deg) longitude(deg)  height(m)   Q  ns   sdn(m)   sde(m)   sdu(m)  sdne(m)  sdeu(m)  sdun(m) age(s)  ratio

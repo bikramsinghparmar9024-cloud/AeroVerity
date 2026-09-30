@@ -14,8 +14,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from dronerecon.geo import LocalFrame
-from dronerecon.pose.types import CameraPose
+from aerometric.geo import LocalFrame
+from aerometric.pose.types import CameraPose
 
 W, H, F = 640, 480, 500.0
 FPS = 15.0

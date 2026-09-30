@@ -2,15 +2,15 @@ import numpy as np
 import pytest
 import tifffile
 
-from dronerecon.config import RasterConfig
-from dronerecon.depth.mono import AlignedDepth
-from dronerecon.geo import LocalFrame
-from dronerecon.georef.dem import load_dem, read_geotiff
-from dronerecon.outputs.mesh_io import SurfaceAttributes
-from dronerecon.outputs.rasters import orthophoto, rasterize_surface, write_surface_rasters
-from dronerecon.pose.types import CameraPose, Trajectory
-from dronerecon.segmentation import Label
-from dronerecon.types import CameraIntrinsics
+from aerometric.config import RasterConfig
+from aerometric.depth.mono import AlignedDepth
+from aerometric.geo import LocalFrame
+from aerometric.georef.dem import load_dem, read_geotiff
+from aerometric.outputs.mesh_io import SurfaceAttributes
+from aerometric.outputs.rasters import orthophoto, rasterize_surface, write_surface_rasters
+from aerometric.pose.types import CameraPose, Trajectory
+from aerometric.segmentation import Label
+from aerometric.types import CameraIntrinsics
 
 FRAME = LocalFrame(28.6, 77.2, 200.0)
 K = CameraIntrinsics(640, 480, 400, 400, 320, 240, source="provided")

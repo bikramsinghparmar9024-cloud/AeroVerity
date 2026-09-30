@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 import pytest
 
-from dronerecon.config import PathsConfig
-from dronerecon.ingest.video import VideoError, iter_frames, parse_ffprobe, probe_video
+from aerometric.config import PathsConfig
+from aerometric.ingest.video import VideoError, iter_frames, parse_ffprobe, probe_video
 
 NO_FFPROBE = PathsConfig(ffprobe="definitely-not-ffprobe")
 

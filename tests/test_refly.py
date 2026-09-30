@@ -1,13 +1,13 @@
 import numpy as np
 import pytest
 
-from dronerecon.config import ReflyConfig
-from dronerecon.geo import LocalFrame
-from dronerecon.pose.types import CameraPose, Trajectory
-from dronerecon.quality.coverage import WeakRegion
-from dronerecon.refly import advise
-from dronerecon.trust import TrustLabel, assess
-from dronerecon.types import CameraIntrinsics
+from aerometric.config import ReflyConfig
+from aerometric.geo import LocalFrame
+from aerometric.pose.types import CameraPose, Trajectory
+from aerometric.quality.coverage import WeakRegion
+from aerometric.refly import advise
+from aerometric.trust import TrustLabel, assess
+from aerometric.types import CameraIntrinsics
 
 K = CameraIntrinsics(800, 600, 500, 500, 400, 300, source="provided")
 NADIR = np.diag([1.0, -1.0, -1.0])

@@ -1,11 +1,11 @@
 import numpy as np
 import pytest
 
-from dronerecon.depth.crossview import CrossViewScore
-from dronerecon.depth.mono import AlignedDepth
-from dronerecon.pose.types import CameraPose, Trajectory
-from dronerecon.trust import TrustLabel, assess, measure_distance, vertex_agreement
-from dronerecon.types import CameraIntrinsics
+from aerometric.depth.crossview import CrossViewScore
+from aerometric.depth.mono import AlignedDepth
+from aerometric.pose.types import CameraPose, Trajectory
+from aerometric.trust import TrustLabel, assess, measure_distance, vertex_agreement
+from aerometric.types import CameraIntrinsics
 
 M, I, U = TrustLabel.MEASURED, TrustLabel.INFERRED, TrustLabel.UNKNOWN
 

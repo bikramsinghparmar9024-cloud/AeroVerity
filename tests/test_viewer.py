@@ -5,12 +5,12 @@ import urllib.request
 import numpy as np
 import pytest
 
-from dronerecon.pose.classical import SparseModel
-from dronerecon.pose.types import CameraPose, Trajectory
-from dronerecon.pose.verifier import TrajectoryMetrics, VerificationResult
-from dronerecon.types import CameraIntrinsics
-from dronerecon.viewer.export import accepted_payload, write_accepted, write_preview
-from dronerecon.viewer.server import serve_in_background
+from aerometric.pose.classical import SparseModel
+from aerometric.pose.types import CameraPose, Trajectory
+from aerometric.pose.verifier import TrajectoryMetrics, VerificationResult
+from aerometric.types import CameraIntrinsics
+from aerometric.viewer.export import accepted_payload, write_accepted, write_preview
+from aerometric.viewer.server import serve_in_background
 
 K = CameraIntrinsics(1920, 1080, 1400, 1400, 960, 540, source="provided")
 

@@ -5,10 +5,10 @@ import numpy as np
 import pytest
 import trimesh
 
-from dronerecon.geo import LocalFrame
-from dronerecon.outputs.mesh_io import TRUST_COLORS, SurfaceAttributes, write_glb, write_ply
-from dronerecon.segmentation import Label
-from dronerecon.types import DataError
+from aerometric.geo import LocalFrame
+from aerometric.outputs.mesh_io import TRUST_COLORS, SurfaceAttributes, write_glb, write_ply
+from aerometric.segmentation import Label
+from aerometric.types import DataError
 
 FRAME = LocalFrame(28.6, 77.2, 215.0)
 

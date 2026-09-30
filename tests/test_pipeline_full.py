@@ -4,11 +4,11 @@ import numpy as np
 import pytest
 import trimesh
 
-from dronerecon.config import FusionConfig, PipelineConfig, UncertaintyConfig
-from dronerecon.ingest.flight import FlightInputs
-from dronerecon.outputs.report import verify_report
-from dronerecon.pipeline.back import run_back
-from dronerecon.pipeline.front import run_front
+from aerometric.config import FusionConfig, PipelineConfig, UncertaintyConfig
+from aerometric.ingest.flight import FlightInputs
+from aerometric.outputs.report import verify_report
+from aerometric.pipeline.back import run_back
+from aerometric.pipeline.front import run_front
 from synthetic_flight import FRAME, make_flight
 
 

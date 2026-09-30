@@ -1,14 +1,14 @@
 import numpy as np
 import pytest
 
-from dronerecon.config import TelemetryConfig
-from dronerecon.ingest.telemetry import (
+from aerometric.config import TelemetryConfig
+from aerometric.ingest.telemetry import (
     load_telemetry,
     parse_baro_csv,
     parse_dji_srt,
     parse_imu_csv,
 )
-from dronerecon.types import DataError
+from aerometric.types import DataError
 
 MODERN_SRT = """1
 00:00:00,000 --> 00:00:00,033

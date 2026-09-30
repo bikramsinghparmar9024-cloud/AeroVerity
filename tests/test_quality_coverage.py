@@ -1,12 +1,12 @@
 import numpy as np
 import pytest
 
-from dronerecon.config import CoverageConfig
-from dronerecon.pose.classical import SparseModel
-from dronerecon.pose.types import CameraPose, Trajectory
-from dronerecon.quality.coverage import analyse_coverage, with_coverage
-from dronerecon.quality.gate import CheckResult, FrameMetrics, GateReport
-from dronerecon.types import CameraIntrinsics, DataError
+from aerometric.config import CoverageConfig
+from aerometric.pose.classical import SparseModel
+from aerometric.pose.types import CameraPose, Trajectory
+from aerometric.quality.coverage import analyse_coverage, with_coverage
+from aerometric.quality.gate import CheckResult, FrameMetrics, GateReport
+from aerometric.types import CameraIntrinsics, DataError
 
 W, H, F = 1600, 1200, 1200.0
 K = CameraIntrinsics(W, H, F, F, W / 2, H / 2, source="provided")

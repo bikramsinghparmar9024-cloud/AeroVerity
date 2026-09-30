@@ -4,12 +4,12 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-from dronerecon.calibration import PairCorrespondences
-from dronerecon.config import PoseConfig
-from dronerecon.pose.feedforward import PoseInputs, make_pose_model, preview_payload, t0_preview
-from dronerecon.pose.geometry import umeyama
-from dronerecon.pose.types import CameraPose
-from dronerecon.types import CameraIntrinsics, DataError
+from aerometric.calibration import PairCorrespondences
+from aerometric.config import PoseConfig
+from aerometric.pose.feedforward import PoseInputs, make_pose_model, preview_payload, t0_preview
+from aerometric.pose.geometry import umeyama
+from aerometric.pose.types import CameraPose
+from aerometric.types import CameraIntrinsics, DataError
 
 W, H, F = 1920, 1080, 1400.0
 K = CameraIntrinsics(W, H, F, F, W / 2, H / 2, source="provided")

@@ -6,8 +6,8 @@ import urllib.request
 
 import pytest
 
-from dronerecon.viewer.jobs import JobQueue, StatusReport
-from dronerecon.viewer.server import make_app_server
+from aerometric.viewer.jobs import JobQueue, StatusReport
+from aerometric.viewer.server import make_app_server
 
 
 def fake_pipeline(job, cfg, key_path):

@@ -3,10 +3,10 @@ import json
 import numpy as np
 import pytest
 
-from dronerecon.config import PipelineConfig
-from dronerecon.ingest.flight import FlightInputs
-from dronerecon.outputs.report import generate_key, verify_report
-from dronerecon.pipeline.front import run_front
+from aerometric.config import PipelineConfig
+from aerometric.ingest.flight import FlightInputs
+from aerometric.outputs.report import generate_key, verify_report
+from aerometric.pipeline.front import run_front
 from synthetic_flight import FRAME, make_flight
 
 

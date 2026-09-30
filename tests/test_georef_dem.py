@@ -3,11 +3,11 @@ import pytest
 import tifffile
 from scipy.spatial.transform import Rotation
 
-from dronerecon.geo import LocalFrame
-from dronerecon.georef.dem import ElevationModel, load_dem, register_to_dem
-from dronerecon.georef.similarity import GeoRegistration
-from dronerecon.pose.types import CameraPose, Similarity, Trajectory
-from dronerecon.types import CameraIntrinsics, DataError
+from aerometric.geo import LocalFrame
+from aerometric.georef.dem import ElevationModel, load_dem, register_to_dem
+from aerometric.georef.similarity import GeoRegistration
+from aerometric.pose.types import CameraPose, Similarity, Trajectory
+from aerometric.types import CameraIntrinsics, DataError
 
 FRAME = LocalFrame(28.6, 77.2, 0.0)
 K = CameraIntrinsics(1920, 1080, 1400, 1400, 960, 540, source="provided")

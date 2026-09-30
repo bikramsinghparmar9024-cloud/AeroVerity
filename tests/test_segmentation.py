@@ -1,9 +1,9 @@
-﻿import cv2
+import cv2
 import numpy as np
 import pytest
 
-from dronerecon.config import SegmentationConfig
-from dronerecon.segmentation import (
+from aerometric.config import SegmentationConfig
+from aerometric.segmentation import (
     Label,
     Segmenter,
     SegmentationResult,
@@ -11,7 +11,7 @@ from dronerecon.segmentation import (
     make_segmenter,
     save_labels,
 )
-from dronerecon.types import DataError
+from aerometric.types import DataError
 
 MOCK = SegmentationConfig(backend="mock")
 

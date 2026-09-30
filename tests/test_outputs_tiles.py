@@ -4,11 +4,11 @@ import numpy as np
 import pytest
 import trimesh
 
-from dronerecon.geo import LocalFrame, enu_to_ecef_matrix, lla_to_ecef
-from dronerecon.outputs.mesh_io import SurfaceAttributes
-from dronerecon.outputs.rasters import Grid
-from dronerecon.outputs.tiles import raster_to_geojson, write_layers, write_tileset
-from dronerecon.segmentation import Label
+from aerometric.geo import LocalFrame, enu_to_ecef_matrix, lla_to_ecef
+from aerometric.outputs.mesh_io import SurfaceAttributes
+from aerometric.outputs.rasters import Grid
+from aerometric.outputs.tiles import raster_to_geojson, write_layers, write_tileset
+from aerometric.segmentation import Label
 
 FRAME = LocalFrame(28.6, 77.2, 210.0)
 

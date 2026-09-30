@@ -4,12 +4,12 @@ import numpy as np
 import pytest
 import tifffile
 
-from dronerecon.change.changemap import ChangeClass, compute_change, describe, write_change
-from dronerecon.geo import LocalFrame
-from dronerecon.outputs.mesh_io import SurfaceAttributes
-from dronerecon.outputs.rasters import Grid, SurfaceRasters, rasterize_surface
-from dronerecon.config import RasterConfig
-from dronerecon.trust import TrustLabel
+from aerometric.change.changemap import ChangeClass, compute_change, describe, write_change
+from aerometric.geo import LocalFrame
+from aerometric.outputs.mesh_io import SurfaceAttributes
+from aerometric.outputs.rasters import Grid, SurfaceRasters, rasterize_surface
+from aerometric.config import RasterConfig
+from aerometric.trust import TrustLabel
 
 FRAME = LocalFrame(28.6, 77.2, 210.0)
 GRID = Grid(e0=-50.0, n0=50.0, cell_m=1.0, width=101, height=101)

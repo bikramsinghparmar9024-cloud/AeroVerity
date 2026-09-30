@@ -2,10 +2,10 @@ import cv2
 import numpy as np
 import pytest
 
-from dronerecon.config import MatchingConfig, PairingConfig
-from dronerecon.matching.features import make_matching
-from dronerecon.matching.pairs import VladRetrieval, global_descriptors, select_pairs
-from dronerecon.types import DataError
+from aerometric.config import MatchingConfig, PairingConfig
+from aerometric.matching.features import make_matching
+from aerometric.matching.pairs import VladRetrieval, global_descriptors, select_pairs
+from aerometric.types import DataError
 
 
 def as_set(pairs, reason=None):

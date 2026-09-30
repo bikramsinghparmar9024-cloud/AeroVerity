@@ -2,14 +2,14 @@ import cv2
 import numpy as np
 import pytest
 
-from dronerecon.config import MatchingConfig
-from dronerecon.matching.features import (
+from aerometric.config import MatchingConfig
+from aerometric.matching.features import (
     LightGlueBackend,
     lightglue_available,
     make_matching,
     verify_pair,
 )
-from dronerecon.types import DataError
+from aerometric.types import DataError
 
 OPENCV = MatchingConfig(backend="opencv", max_dim=800)
 

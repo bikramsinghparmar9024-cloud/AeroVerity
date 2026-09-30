@@ -3,12 +3,12 @@ import numpy as np
 import pytest
 import tifffile
 
-from dronerecon.config import GeorefConfig
-from dronerecon.geo import LocalFrame
-from dronerecon.georef.satellite import GeoImage, load_geoimage, register_to_satellite
-from dronerecon.georef.similarity import GeoRegistration
-from dronerecon.pose.types import CameraPose, Similarity, Trajectory
-from dronerecon.types import CameraIntrinsics, DataError
+from aerometric.config import GeorefConfig
+from aerometric.geo import LocalFrame
+from aerometric.georef.satellite import GeoImage, load_geoimage, register_to_satellite
+from aerometric.georef.similarity import GeoRegistration
+from aerometric.pose.types import CameraPose, Similarity, Trajectory
+from aerometric.types import CameraIntrinsics, DataError
 
 FRAME = LocalFrame(28.6, 77.2, 0.0)
 K = CameraIntrinsics(640, 480, 500, 500, 320, 240, source="provided")

@@ -1,7 +1,7 @@
-# dronerecon — project handoff (read this instead of scanning the code)
+# aerometric — project handoff (read this instead of scanning the code)
 
 SIH 2026 problem statement **SIH26158** (NTRO): *Single-pass drone video → georeferenced, metrically
-accurate, textured 3D model*. Python package `dronerecon` in `src/`, ~110 files, **225 tests pass
+accurate, textured 3D model*. Python package `aerometric` in `src/`, ~110 files, **225 tests pass
 (2 skipped)** as of 2026-09-30. Everything runs offline on CPU (Windows 11, Python 3.10.8).
 
 ## How to work with the user (important)
@@ -18,14 +18,14 @@ accurate, textured 3D model*. Python package `dronerecon` in `src/`, ~110 files,
 ## Run / test (PowerShell)
 ```powershell
 $env:PYTHONPATH="src"                              # package is NOT pip-installed yet
-python -m dronerecon app --runs runs               # web app on http://localhost:8765 (upload + queue + viewer)
-python -m dronerecon run --video V --telemetry V.SRT [--intrinsics cam.json] --out runs/x [--viewer] [--config f.json]
-python -m dronerecon compare runs/a runs/b --out runs/change
-python -m dronerecon verify runs/x/report/quality_report.json --files runs/x
+python -m aerometric app --runs runs               # web app on http://localhost:8765 (upload + queue + viewer)
+python -m aerometric run --video V --telemetry V.SRT [--intrinsics cam.json] --out runs/x [--viewer] [--config f.json]
+python -m aerometric compare runs/a runs/b --out runs/change
+python -m aerometric verify runs/x/report/quality_report.json --files runs/x
 python -m pytest -q                                # full suite ~10 min (end-to-end tests render synthetic flights)
 ```
-- The Browser-pane preview is defined in `.claude/launch.json` as `dronerecon-app` (the web app), `dronerecon-demo`
-  and `dronerecon-viewer`. Start it with `preview_start name=dronerecon-app`.
+- The Browser-pane preview is defined in `.claude/launch.json` as `aerometric-app` (the web app), `aerometric-demo`
+  and `aerometric-viewer`. Start it with `preview_start name=aerometric-app`.
 - Restarting the app **interrupts a running job** (it gets marked failed/"Interrupted"), so ask before restarting.
 - The page (`index.html`) is read on every request, so HTML edits need no restart. Python edits do.
 

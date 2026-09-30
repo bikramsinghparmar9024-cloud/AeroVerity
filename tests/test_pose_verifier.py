@@ -1,10 +1,10 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from dronerecon.pose.classical import ReconstructionResult, SparseModel
-from dronerecon.pose.types import CameraPose, Trajectory
-from dronerecon.pose.verifier import verify
-from dronerecon.types import CameraIntrinsics
+from aerometric.pose.classical import ReconstructionResult, SparseModel
+from aerometric.pose.types import CameraPose, Trajectory
+from aerometric.pose.verifier import verify
+from aerometric.types import CameraIntrinsics
 
 W, H, F, N = 1920, 1080, 1400.0, 8
 K = CameraIntrinsics(W, H, F, F, W / 2, H / 2, source="provided")

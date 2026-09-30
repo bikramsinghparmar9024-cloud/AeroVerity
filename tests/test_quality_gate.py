@@ -2,16 +2,16 @@ import cv2
 import numpy as np
 import pytest
 
-from dronerecon.geo import LocalFrame
-from dronerecon.quality.gate import (
+from aerometric.geo import LocalFrame
+from aerometric.quality.gate import (
     blockiness,
     evaluate_gate,
     frame_metrics,
     sample_stride,
 )
-from dronerecon.sync.offset import OffsetEstimate
-from dronerecon.sync.smoothing import SmoothedTrack
-from dronerecon.types import Frame, VideoInfo
+from aerometric.sync.offset import OffsetEstimate
+from aerometric.sync.smoothing import SmoothedTrack
+from aerometric.types import Frame, VideoInfo
 
 VIDEO = VideoInfo("v.mp4", 960, 540, 30.0, 300)  # 10 s
 GOOD_SYNC = OffsetEstimate(0.3, 0.9, True, "gps_speed")

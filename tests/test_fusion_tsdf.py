@@ -1,13 +1,13 @@
 import numpy as np
 import pytest
 
-from dronerecon.config import FusionConfig
-from dronerecon.depth.crossview import score_all
-from dronerecon.depth.mono import AlignedDepth
-from dronerecon.fusion.tsdf import fuse_tsdf
-from dronerecon.pose.types import CameraPose, Trajectory
-from dronerecon.segmentation import Label, SegmentationResult
-from dronerecon.types import CameraIntrinsics, DataError
+from aerometric.config import FusionConfig
+from aerometric.depth.crossview import score_all
+from aerometric.depth.mono import AlignedDepth
+from aerometric.fusion.tsdf import fuse_tsdf
+from aerometric.pose.types import CameraPose, Trajectory
+from aerometric.segmentation import Label, SegmentationResult
+from aerometric.types import CameraIntrinsics, DataError
 
 W, H, F = 640, 480, 400.0
 K = CameraIntrinsics(W, H, F, F, W / 2, H / 2, source="provided")

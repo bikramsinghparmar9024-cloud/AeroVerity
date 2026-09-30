@@ -1,11 +1,11 @@
 import numpy as np
 import pytest
 
-from dronerecon.config import FusionConfig, UncertaintyConfig
-from dronerecon.depth.mono import frame_observations, make_depth_model
-from dronerecon.pose.tracks import build_tracks, triangulate
-from dronerecon.pose.geometry import normalized_points
-from dronerecon.uncertainty.bootstrap import (
+from aerometric.config import FusionConfig, UncertaintyConfig
+from aerometric.depth.mono import frame_observations, make_depth_model
+from aerometric.pose.tracks import build_tracks, triangulate
+from aerometric.pose.geometry import normalized_points
+from aerometric.uncertainty.bootstrap import (
     draw_runs,
     pose_run,
     run_bootstrap,

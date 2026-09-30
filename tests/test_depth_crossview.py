@@ -1,11 +1,11 @@
 import numpy as np
 import pytest
 
-from dronerecon.config import DepthConfig
-from dronerecon.depth.crossview import score_all, score_frame
-from dronerecon.depth.mono import AlignedDepth, FrameObservations, make_depth_model, predict_aligned
-from dronerecon.pose.types import CameraPose, Trajectory
-from dronerecon.types import CameraIntrinsics, DataError
+from aerometric.config import DepthConfig
+from aerometric.depth.crossview import score_all, score_frame
+from aerometric.depth.mono import AlignedDepth, FrameObservations, make_depth_model, predict_aligned
+from aerometric.pose.types import CameraPose, Trajectory
+from aerometric.types import CameraIntrinsics, DataError
 
 W, H, F = 1024, 768, 800.0
 K = CameraIntrinsics(W, H, F, F, W / 2, H / 2, source="provided")

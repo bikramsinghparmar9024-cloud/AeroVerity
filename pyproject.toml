@@ -3,7 +3,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "dronerecon"
+name = "aerometric"
 version = "0.1.0"
 description = "Single-pass drone video to georeferenced 3D model (SIH26158)"
 requires-python = ">=3.10"
@@ -18,7 +18,7 @@ matching = ["lightglue @ git+https://github.com/cvg/LightGlue.git"]
 where = ["src"]
 
 [tool.setuptools.package-data]
-dronerecon = ["viewer/static/*"]
+aerometric = ["viewer/static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -4,10 +4,10 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-from dronerecon.geo import LocalFrame
-from dronerecon.outputs.points_io import SH_C0, write_las, write_splat_seed
-from dronerecon.segmentation import Label
-from dronerecon.types import DataError
+from aerometric.geo import LocalFrame
+from aerometric.outputs.points_io import SH_C0, write_las, write_splat_seed
+from aerometric.segmentation import Label
+from aerometric.types import DataError
 
 FRAME = LocalFrame(28.6, 77.2, 210.0)
 

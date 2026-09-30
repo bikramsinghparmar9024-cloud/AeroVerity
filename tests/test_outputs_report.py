@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from dronerecon.outputs.report import ReportBuilder, generate_key, load_key, verify_report, write_report
+from aerometric.outputs.report import ReportBuilder, generate_key, load_key, verify_report, write_report
 
 
 def clock():

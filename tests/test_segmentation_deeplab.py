@@ -3,9 +3,9 @@ import numpy as np
 import pytest
 from skimage import data
 
-from dronerecon.config import SegmentationConfig
-from dronerecon.segmentation import Label, make_segmenter
-from dronerecon.segmentation.deeplab import weights_cached
+from aerometric.config import SegmentationConfig
+from aerometric.segmentation import Label, make_segmenter
+from aerometric.segmentation.deeplab import weights_cached
 
 pytestmark = pytest.mark.skipif(not weights_cached(), reason="DeepLabV3 weights not in the local torch cache")
 

@@ -2,11 +2,11 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-from dronerecon.config import ClassicalConfig
-from dronerecon.pose.classical import reconstruct
-from dronerecon.pose.tracks import PairMatches, build_tracks
-from dronerecon.pose.types import CameraPose, Trajectory
-from dronerecon.types import CameraIntrinsics, DataError
+from aerometric.config import ClassicalConfig
+from aerometric.pose.classical import reconstruct
+from aerometric.pose.tracks import PairMatches, build_tracks
+from aerometric.pose.types import CameraPose, Trajectory
+from aerometric.types import CameraIntrinsics, DataError
 
 W, H, F = 1920, 1080, 1400.0
 K = CameraIntrinsics(W, H, F, F, W / 2, H / 2, source="provided")

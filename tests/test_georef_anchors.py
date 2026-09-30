@@ -2,9 +2,9 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-from dronerecon.config import GeorefConfig
-from dronerecon.georef.similarity import KnownDistance, georeference
-from dronerecon.pose.types import CameraPose, Similarity, Trajectory
+from aerometric.config import GeorefConfig
+from aerometric.georef.similarity import KnownDistance, georeference
+from aerometric.pose.types import CameraPose, Similarity, Trajectory
 from test_georef_similarity import FRAME, K, gimbal_rotation, rot_err
 
 N = 12

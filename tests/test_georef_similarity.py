@@ -2,11 +2,11 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-from dronerecon.geo import LocalFrame
-from dronerecon.georef.gravity import GravityObservations, gravity_from_attitude, up_from_gimbal
-from dronerecon.georef.similarity import georeference
-from dronerecon.pose.types import CameraPose, Similarity, Trajectory
-from dronerecon.types import AttitudeSeries, CameraIntrinsics
+from aerometric.geo import LocalFrame
+from aerometric.georef.gravity import GravityObservations, gravity_from_attitude, up_from_gimbal
+from aerometric.georef.similarity import georeference
+from aerometric.pose.types import CameraPose, Similarity, Trajectory
+from aerometric.types import AttitudeSeries, CameraIntrinsics
 
 K = CameraIntrinsics(1920, 1080, 1400, 1400, 960, 540, source="provided")
 FRAME = LocalFrame(28.6, 77.2, 200.0)
@@ -67,7 +67,7 @@ def test_up_from_gimbal_matches_constructed_cameras():
 
 
 def test_rotation_from_gimbal_is_consistent_with_gravity():
-    from dronerecon.georef.gravity import rotation_from_gimbal
+    from aerometric.georef.gravity import rotation_from_gimbal
 
     for yaw, pitch, roll in [(0, -90, 0), (90, -80, 0), (200, -45, 6), (315, -20, -8)]:
         R = rotation_from_gimbal(yaw, pitch, roll)

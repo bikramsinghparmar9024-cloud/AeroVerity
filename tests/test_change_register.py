@@ -3,9 +3,9 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-from dronerecon.change.register import apply, icp, ortho_prior, register_flights, to_frame
-from dronerecon.geo import LocalFrame
-from dronerecon.pose.types import Similarity
+from aerometric.change.register import apply, icp, ortho_prior, register_flights, to_frame
+from aerometric.geo import LocalFrame
+from aerometric.pose.types import Similarity
 
 FRAME_A = LocalFrame(28.6000, 77.2000, 210.0)
 FRAME_B = LocalFrame(28.6004, 77.1997, 205.0)  # flight B took off elsewhere

@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 
-from dronerecon.geo import LocalFrame
-from dronerecon.sync.offset import OffsetEstimate
-from dronerecon.sync.smoothing import smooth_flight, smooth_gps
-from dronerecon.types import CameraIntrinsics, FlightRecord, GpsTrack, VideoInfo
+from aerometric.geo import LocalFrame
+from aerometric.sync.offset import OffsetEstimate
+from aerometric.sync.smoothing import smooth_flight, smooth_gps
+from aerometric.types import CameraIntrinsics, FlightRecord, GpsTrack, VideoInfo
 
 FRAME = LocalFrame(28.6, 77.2, 100.0)
 

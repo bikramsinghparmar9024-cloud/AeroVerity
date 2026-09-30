@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 import pytest
 
-from dronerecon.config import SyncConfig
-from dronerecon.sync.offset import (
+from aerometric.config import SyncConfig
+from aerometric.sync.offset import (
     EARTH_RADIUS_M,
     Signal,
     cross_correlate,
@@ -11,7 +11,7 @@ from dronerecon.sync.offset import (
     estimate_video_offset,
     flow_signal,
 )
-from dronerecon.types import Frame, GpsTrack, ImuSeries
+from aerometric.types import Frame, GpsTrack, ImuSeries
 
 FPS = 10.0
 TRUE_OFFSET = 0.7  # t_telemetry = t_video + offset

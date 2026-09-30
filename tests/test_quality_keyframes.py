@@ -2,11 +2,11 @@ import cv2
 import numpy as np
 import pytest
 
-from dronerecon.config import KeyframeConfig
-from dronerecon.geo import LocalFrame
-from dronerecon.quality.keyframes import select_keyframes
-from dronerecon.sync.smoothing import SmoothedTrack
-from dronerecon.types import AttitudeSeries, Frame
+from aerometric.config import KeyframeConfig
+from aerometric.geo import LocalFrame
+from aerometric.quality.keyframes import select_keyframes
+from aerometric.sync.smoothing import SmoothedTrack
+from aerometric.types import AttitudeSeries, Frame
 
 W, H, FPS = 480, 270, 10.0
 

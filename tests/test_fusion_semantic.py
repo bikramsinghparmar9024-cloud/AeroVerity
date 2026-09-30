@@ -1,10 +1,10 @@
 import numpy as np
 
-from dronerecon.depth.mono import AlignedDepth
-from dronerecon.fusion.semantic import NO_LABEL, vote_labels
-from dronerecon.pose.types import CameraPose, Trajectory
-from dronerecon.segmentation import Label, SegmentationResult
-from dronerecon.types import CameraIntrinsics
+from aerometric.depth.mono import AlignedDepth
+from aerometric.fusion.semantic import NO_LABEL, vote_labels
+from aerometric.pose.types import CameraPose, Trajectory
+from aerometric.segmentation import Label, SegmentationResult
+from aerometric.types import CameraIntrinsics
 
 W, H, F = 640, 480, 400.0
 K = CameraIntrinsics(W, H, F, F, W / 2, H / 2, source="provided")

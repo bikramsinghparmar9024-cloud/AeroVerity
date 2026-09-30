@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 
-from dronerecon.pose.types import CameraPose, Trajectory
-from dronerecon.types import CameraIntrinsics
-from dronerecon.uncertainty.bootstrap import RunDraw
-from dronerecon.uncertainty.calibration import calibrate, held_out_errors, reliability_svg
+from aerometric.pose.types import CameraPose, Trajectory
+from aerometric.types import CameraIntrinsics
+from aerometric.uncertainty.bootstrap import RunDraw
+from aerometric.uncertainty.calibration import calibrate, held_out_errors, reliability_svg
 
 K = CameraIntrinsics(1000, 800, 800, 800, 500, 400, source="provided")
 

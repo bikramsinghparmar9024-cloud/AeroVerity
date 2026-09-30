@@ -3,8 +3,8 @@ import json
 import numpy as np
 import pytest
 
-from dronerecon.config import ConfigError, PipelineConfig, load_config
-from dronerecon.types import (
+from aerometric.config import ConfigError, PipelineConfig, load_config
+from aerometric.types import (
     CameraIntrinsics,
     DataError,
     FlightRecord,

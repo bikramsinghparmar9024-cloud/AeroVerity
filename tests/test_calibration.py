@@ -2,16 +2,16 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-from dronerecon.calibration import (
+from aerometric.calibration import (
     PairCorrespondences,
     assess_rolling_shutter,
     distort_normalized,
     self_calibrate,
     undistort_normalized,
 )
-from dronerecon.config import CalibrationConfig
-from dronerecon.sync.offset import FlowSignal
-from dronerecon.types import CameraIntrinsics
+from aerometric.config import CalibrationConfig
+from aerometric.sync.offset import FlowSignal
+from aerometric.types import CameraIntrinsics
 
 W, H = 1920, 1080
 F_TRUE, K1, K2 = 1450.0, -0.12, 0.03

@@ -4,9 +4,9 @@ import shutil
 import numpy as np
 import pytest
 
-from dronerecon.cli import main
-from dronerecon.geo import LocalFrame
-from dronerecon.pipeline.back import load_state
+from aerometric.cli import main
+from aerometric.geo import LocalFrame
+from aerometric.pipeline.back import load_state
 from synthetic_flight import make_flight
 
 
@@ -68,7 +68,7 @@ def test_console_on_a_legacy_code_page_does_not_crash(monkeypatch):
     import io
     import sys
 
-    from dronerecon.cli import ConsoleReport, _safe_console
+    from aerometric.cli import ConsoleReport, _safe_console
 
     raw = io.BytesIO()
     legacy = io.TextIOWrapper(raw, encoding="cp1252")  # what Windows uses for redirected output
