@@ -111,8 +111,8 @@ def _cmd_app(args) -> int:
     from aerometric.viewer.server import make_app_server
 
     jobs = JobQueue(Path(args.runs), load_config(args.config), Path(args.key) if args.key else None)
-    server = make_app_server(jobs, port=args.port)
-    print(f"aerometric is running at http://127.0.0.1:{server.server_address[1]}/")
+    server = make_app_server(jobs, host=args.host, port=args.port)
+    print(f"aerometric is running at http://{args.host}:{server.server_address[1]}/")
     print(f"Runs are stored in {Path(args.runs).resolve()}  (Ctrl+C to stop)")
     try:
         server.serve_forever()
@@ -161,6 +161,7 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--runs", default="runs", help="folder where uploaded runs are stored")
     a.add_argument("--config", help="settings .json used for every run")
     a.add_argument("--key", help="signing key .pem shared by all runs (default: one per run)")
+    a.add_argument("--host", default="127.0.0.1", help="host to bind to (use 0.0.0.0 for Docker)")
     a.add_argument("--port", type=int, default=8765)
     a.set_defaults(func=_cmd_app)
 
