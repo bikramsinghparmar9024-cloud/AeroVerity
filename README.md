@@ -2,10 +2,6 @@ AeroVerity 3D
 
 > A single-pass drone video to georeferenced 3D reconstruction system with confidence-aware geometry.
 
-**Team:** AIT_LogShield  
-**Team ID:** 136059  
-**Problem Statement:** SIH 2026 - 26158, *Single-Pass Drone Video to Accurate 3D Model Generation System*  
-**Theme:** Robotics and Drones
 
 ## Overview
 
