@@ -1,114 +1,149 @@
-# AeroMetric
+AeroVerity 3D
 
-Single-pass drone video → georeferenced, metric 3D model that says how much of itself it can vouch for.
-Built for Smart India Hackathon 2026, problem statement **SIH26158** (NTRO).
+> A single-pass drone video to georeferenced 3D reconstruction system with confidence-aware geometry.
 
-Every surface in the model carries one of three labels:
+**Team:** AIT_LogShield  
+**Team ID:** 136059  
+**Problem Statement:** SIH 2026 - 26158, *Single-Pass Drone Video to Accurate 3D Model Generation System*  
+**Theme:** Robotics and Drones
 
-| Label | Meaning | Can you measure on it? |
-|---|---|---|
-| **Measured** | Seen well enough from enough angles; calibrated uncertainty ≤ 0.25 m | Yes, with a stated ± |
-| **Inferred** | Surface is there, but uncertainty is larger (≤ 1 m) or could not be estimated | No |
-| **Unknown** | Not seen clearly, or a moving object | No |
+## Overview
 
-Where the model is weak, the **re-fly advisor** says why and where to point the camera next time.
+AeroVerity 3D turns drone video and flight telemetry into a metric, georeferenced 3D reconstruction. The pipeline is designed to work from a single flight pass and reports how well each part of the model is supported by visual evidence.
 
-## Install
+Instead of treating every reconstructed surface as equally reliable, the system labels geometry as:
 
-Python 3.10+, runs fully offline.
+- **MEASURED** - supported by consistent evidence across views; measurement is enabled.
+- **INFERRED** - plausible geometry with incomplete or uncertain visual support.
+- **UNKNOWN** - unsupported geometry that should not be used for measurement.
 
-```bash
-pip install -e .[dev]
-pip install "git+https://github.com/cvg/LightGlue.git"   # recommended: learned feature matching
+These labels help operators distinguish a visually complete model from one that is reliable for measurement.
+
+## Goals
+
+- Reconstruct useful 3D geometry from a single drone video pass.
+- Align video frames with GPS, gyro, IMU, and barometer telemetry.
+- Verify camera poses and geometry using both visual and flight data.
+- Estimate uncertainty and expose it to operators.
+- Produce geospatial, visualization, and analysis outputs.
+- Reduce dependence on repeated flights and dense ground control point (GCP) surveys.
+
+## Conceptual Pipeline
+
+1. **Input preparation** - Ingest drone video and telemetry. Use optical flow and flight motion to estimate timing offsets, smooth the trajectory, assess video quality, and select keyframes.
+2. **Feature matching and pose estimation** - Match keyframe features with ALIKED or DISK and LightGlue. Run a fast AI pose estimate alongside a GPS-constrained pycolmap/SfM track.
+3. **Geometry and verification** - Compare depth across nearby views, check reprojection and GPS residuals, and fuse supported geometry using Open3D TSDF or Poisson reconstruction.
+4. **Trust and outputs** - Classify surfaces as MEASURED, INFERRED, or UNKNOWN; generate model and geospatial outputs, semantic labels, and a quality report.
+
+A re-fly advisor is proposed to identify coverage gaps and suggest viewpoints when another flight is possible.
+
+## Architecture (Proposed)
+
+```text
+Drone video + flight telemetry
+              |
+      Input preparation
+  (FFmpeg, telemetry parser,
+   quality gate, keyframes)
+              |
+       Feature matching
+    (ALIKED/DISK + LightGlue)
+              |
+      Pose estimation tracks
+       /                 \
+Fast AI pose        GPS-constrained SfM
+       \                 /
+        Pose and GPS verifier
+              |
+   Cross-view depth validation
+              |
+     Geometry fusion (Open3D)
+              |
+ Trust labels + uncertainty + QA
+              |
+ Mesh / point cloud / geospatial exports
 ```
 
-LightGlue downloads its weights on first use (`aliked-n16.pth`, `aliked_lightglue_v0-1_arxiv.pth`,
-about 50 MB) into the torch cache. On an air-gapped machine, copy those two files into
-`~/.cache/torch/hub/checkpoints/` beforehand. Without LightGlue, SIFT matching is used automatically.
+This is a conceptual architecture from the project proposal. Implementation details and interfaces may change as the project develops.
 
-## Easiest: the local web app
+## Planned Capabilities
 
-```bash
-python -m aerometric app --runs runs
+- Synchronize video frames with GPS and motion telemetry.
+- Reject or flag low-quality frames using blur, exposure, compression, synchronization, and feature-density checks.
+- Use loop closure and viewpoint diversity to improve reconstruction.
+- Verify AI-estimated trajectories against reprojection and GPS checks, with a classical SfM fallback.
+- Compare depth estimates across views to reduce unsupported or distorted geometry.
+- Estimate per-point or per-surface confidence with bootstrap runs and held-out-view error.
+- Remove dynamic objects, sky, and water where possible, and assign semantic labels such as roads, buildings, and vegetation.
+- Produce a quality report with relative and absolute accuracy information.
+
+## Planned Outputs
+
+Depending on the implemented modules, the system is intended to export:
+
+- 3D meshes and point clouds: **GLB**, **PLY**, and **LAZ**
+- 3D visualization: **3D Tiles** and **Gaussian Splatting**
+- Geospatial products: **DSM**, **orthomosaic**, and **GeoTIFF**
+- Semantic layers, change-detection results, and a signed quality report
+
+Not every format or capability may be available in the current prototype.
+
+## Technology Mentioned in the Proposal
+
+| Area | Proposed tools |
+| --- | --- |
+| Video ingestion | FFmpeg |
+| Feature extraction and matching | ALIKED or DISK, LightGlue |
+| Structure from motion | COLMAP / pycolmap |
+| Geometry processing and fusion | Open3D (TSDF / Poisson) |
+| Semantic segmentation | SAM 3 (listed in the proposal) |
+| Multi-view stereo | OpenMVS (listed in the proposal) |
+| User interface | React, Tailwind CSS (listed in the proposal) |
+
+The proposal does not specify pinned versions, deployment targets, or the final division of functionality among these components. Update this table to reflect the actual implementation and licenses before release.
+
+## Repository Status
+
+This README describes the proposed system. The source PDF does not include the implementation repository, confirmed setup commands, API endpoints, sample data, or test instructions. Replace the placeholders below as those become available.
+
+```text
+[ repository layout to be added ]
 ```
 
-Open **http://localhost:8765**, press **New reconstruction**, choose the video and its `.SRT` (or flight-log
-`.CSV`), and press **Upload and start**. The page shows each of the 15 steps as it completes, fills in the 3D
-view as soon as camera positions exist, and lists the quality report and downloads when the run finishes.
-Earlier runs stay in the run picker. Runs are processed one at a time; everything stays on this computer.
+## Getting Started
 
-## Reconstruct a flight from the command line
+Setup instructions are not included in the proposal. Add the verified steps for your repository here, for example:
 
 ```bash
-python -m aerometric run --video DJI_0001.MP4 --telemetry DJI_0001.SRT --out runs/flight1 --viewer
+# TODO: Clone the repository
+# TODO: Install the documented dependencies
+# TODO: Configure input video and telemetry
+# TODO: Run the reconstruction pipeline
 ```
 
-`--viewer` opens a live page on `http://127.0.0.1:8765`: a quick preview first, then the verified result.
+### Inputs
 
-Optional inputs, each improving accuracy:
+The proposed workflow expects:
 
-| Option | What it adds |
-|---|---|
-| `--intrinsics camera.json` | Camera calibration (otherwise estimated, or assumed 84° field of view) |
-| `--imu imu.csv`, `--baro baro.csv` | Gyro for time sync, barometer for height and tilt |
-| `--rtk flight.pos` | RTK/PPK positions (RTKLIB `.pos`) instead of standard GPS |
-| `--dem dem.asc` / `.tif` | Elevation model (WGS84) to check height and horizontal position |
-| `--satellite ortho.tif` / `.png` + `.pgw` | Georeferenced imagery to check horizontal position |
-| `--config settings.json` | Override any setting in `configs/default.json` |
-| `--key signing.pem` | Signing key for the report (created if missing; keep it private) |
+- A drone video file.
+- Associated flight telemetry, such as GPS and available gyro/IMU/barometer data.
+- Optional DEM or imagery anchors to support georeferencing.
 
-The run stops early if the pre-flight check expects an unusable model (heavy blur, wrong telemetry…);
-`--force` continues anyway.
+Specify supported file formats, coordinate reference systems, camera metadata requirements, and telemetry schemas when implemented.
 
-## What you get (`runs/flight1/`)
+## Accuracy and Limitations
 
-| File | Contents |
-|---|---|
-| `report/quality_report.html` | Readable report: trust summary, every step, warnings, reliability diagram |
-| `report/quality_report.json` | Same, hash-chained and Ed25519-signed |
-| `products/model.glb`, `model.ply` | Mesh; each vertex carries trust, uncertainty (m) and class |
-| `products/points.las` | Coloured point cloud, WGS84, ASPRS classes, trust in User Data |
-| `products/tiles/tileset.json` | 3D Tiles 1.1 for Cesium and similar web viewers |
-| `products/dsm.tif`, `ortho.tif` | Surface model and orthophoto (GeoTIFF, WGS84) |
-| `products/trust.tif`, `class.tif`, `sigma.tif` | Trust, class and uncertainty layers |
-| `products/*.geojson` | Class and trust areas as polygons |
-| `products/splat_seed.ply` | Gaussian-splat file **seeded, not trained** (see limitations) |
-| `products/refly_advice.json` | Weak areas with suggested camera positions |
+A single flight may not capture hidden sides, underhangs, or other occluded areas. Such regions should remain INFERRED or UNKNOWN unless additional evidence supports them. Standard drone GPS and unsynchronized telemetry may also limit absolute positioning. The proposal addresses these issues through telemetry alignment, trajectory smoothing, robust similarity alignment, cross-view verification, and uncertainty reporting, but achieved accuracy must be measured on real data and reported with the relevant conditions.
 
-## Compare two flights
+The confidence labels indicate evidence support; they are not, by themselves, a guarantee of survey-grade accuracy. Report internal/relative accuracy separately from absolute/georeferencing accuracy.
 
-```bash
-python -m aerometric compare runs/flight1 runs/flight2 --out runs/change
-```
+## Roadmap
 
-Aligns flight 2 onto flight 1, then reports only height changes larger than both flights' uncertainty:
-`change_dz.tif`, `change_class.tif`, `change_areas.geojson` (areas and volumes), and a signed report.
-
-## Check a report has not been altered
-
-```bash
-python -m aerometric verify runs/flight1/report/quality_report.json --files runs/flight1
-```
-
-## Current limitations
-
-Honest status: the full pipeline runs end to end and is tested on **synthetic** flights; it has not yet
-been run on real footage. Some components are stand-ins until their models or packages are installed —
-the report and viewer always say when a stand-in was used.
-
-| Component | Now | Intended |
-|---|---|---|
-| Fast AI pose track | Stand-in (two-view chaining) | Feed-forward reconstruction network |
-| Monocular depth | Stand-in (interpolated sparse depth) | Depth network |
-| Segmentation | **DeepLabV3** for people, vehicles, animals (if its weights are cached) + colour rules for vegetation/water; no roads or buildings yet; small objects from high altitude are often missed | Aerial semantic segmentation network |
-| Feature matching | **ALIKED + LightGlue** (installed; SIFT is the automatic fallback) | — |
-| Bundle adjustment, fusion | Built in (SciPy, scikit-image) | pycolmap, Open3D (faster, Poisson option) |
-| LAZ, trained splats | `.las` only; splat seed only | laspy[lazrs]; gsplat on a GPU |
-
-## Tests
-
-```bash
-python -m pytest -q
-```
-
-About 210 tests; the end-to-end ones render a synthetic flight and take a few minutes.
+- [ ] Implement video and telemetry ingestion and synchronization.
+- [ ] Add quality gating and keyframe selection.
+- [ ] Integrate feature matching and pose estimation tracks.
+- [ ] Add pose verification and fallback behavior.
+- [ ] Implement cross-view depth checks and geometry fusion.
+- [ ] Add confidence labeling and calibrated uncertainty reporting.
+- [ ] Add semantic processing and export formats.
+- [ ] Validate accuracy and document supported operating conditions.
